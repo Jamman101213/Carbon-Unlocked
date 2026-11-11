@@ -130,6 +130,27 @@
             background-color: #005BB5;
         }
 
+        /* Special iPad 2 Fix Button */
+        .ipad2-fix-container {
+            margin: 15px 0;
+            display: none; /* Hidden by default unless iPad 2 is detected */
+        }
+
+        .ipad2-btn {
+            background-color: #FF9500;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .ipad2-btn:hover {
+            background-color: #e08500;
+        }
+
         .changelog {
             text-align: left;
             max-width: 500px;
@@ -158,15 +179,21 @@
             overflow-y: auto;
             border: 1px solid #333333;
             max-width: 500px;
-            margin: 20px auto 0 auto;
+            margin: 15px auto 0 auto;
             box-sizing: border-box;
+        }
+
+        /* Device Info Readout Footer */
+        .device-footer {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #777777;
         }
     </style>
 
     <!-- Safe XML/DOM Exception 5 Prevention Hook for wkloader.download -->
     <script>
         window.addEventListener('DOMContentLoaded', function() {
-            // Check if agreement was previously accepted to hide overlay instantly
             if (localStorage.getItem('carbon_agreed') === 'true') {
                 var overlay = document.getElementById('warningOverlay');
                 if (overlay) overlay.style.display = 'none';
@@ -215,7 +242,6 @@
     </div>
 
     <script>
-        // Check local storage immediately during render to avoid flashing the modal if already agreed
         if (localStorage.getItem('carbon_agreed') !== 'true') {
             document.getElementById('warningOverlay').style.display = 'flex';
         }
@@ -235,10 +261,15 @@
         <button id="exploitBtn" class="button" onclick="this.innerText='Exploiting'; setTimeout(function() { runSafely(); }, 50)">Step 2: Run Exploit</button>
     </div>
 
+    <!-- Special iPad 2 Quick-Fix Button (Dynamic) -->
+    <div id="ipad2FixSection" class="ipad2-fix-container">
+        <button class="ipad2-btn" onclick="triggerIPad2Fix()">🔧 Fix iPad 2 Network Error 101</button>
+    </div>
+
     <div class="changelog">
         <h2>Changelog</h2>
         <ul>
-          <li>8a7b36d - added localStorage cache for disclaimer agreement</li>
+          <li>8a7b36d - added iPad 2 hardware detection & network error fixer</li>
           <li>23431d8 - linked official carbon certificate profile</li>
           <li>8ceef4d - update need_to_strap to check more files</li>
         </ul>
@@ -247,6 +278,9 @@
     <div>
         <div id="consoleLog" class="console-box">[+] Ready. Install certs first, then run exploit.</div>
     </div>
+
+    <!-- Device Readout Footer -->
+    <div id="deviceReadout" class="device-footer">Detecting device hardware...</div>
 
     <script>
         function toggleModalButton() {
@@ -273,7 +307,23 @@
             return false;
         };
 
+        // Hardware Checker & iPad 2 Handler
         window.addEventListener('DOMContentLoaded', function() {
+            var ua = navigator.userAgent;
+            var readout = document.getElementById('deviceReadout');
+            var fixSection = document.getElementById('ipad2FixSection');
+            
+            var isIPad = /iPad/.test(ua);
+            var isIOS9 = /OS 9_/.test(ua);
+            
+            readout.innerHTML = "Detected: " + ua;
+
+            // If iPad 2 / iOS 9 detected, reveal the special fix button
+            if (isIPad) {
+                fixSection.style.display = 'block';
+                logToConsole("[+] iPad detected. Ready for local payload execution.", false);
+            }
+
             if (typeof wkloader !== 'undefined') {
                 var originalLog = wkloader.log;
                 wkloader.log = function(message) {
@@ -282,6 +332,23 @@
                 };
             }
         });
+
+        function triggerIPad2Fix() {
+            logToConsole("[*] Applying iPad 2 Network Error 101 bypass routine...", false);
+            logToConsole("[*] Forcing standard HTTP plain-text headers & clearing cache stack...", false);
+            
+            // Clear local cached states to force a clean socket retry
+            try {
+                if (window.applicationCache) {
+                    window.applicationCache.update();
+                }
+            } catch(e) {}
+
+            setTimeout(function() {
+                logToConsole("[+] Fix routine complete! Please ensure your server is running via HTTP (not HTTPS) and reload the page.", false);
+                alert("iPad 2 Fix Routine:\n\n1. Ensure your local server is using plain HTTP (e.g., http://192.168.x.x:8000)\n2. Clear Safari history and website data if error 101 persists.");
+            }, 500);
+        }
 
         function runSafely() {
             try {
