@@ -166,7 +166,12 @@
     <!-- Safe XML/DOM Exception 5 Prevention Hook for wkloader.download -->
     <script>
         window.addEventListener('DOMContentLoaded', function() {
-            // Pre-patch wkloader download behavior if loaded
+            // Check if agreement was previously accepted to hide overlay instantly
+            if (localStorage.getItem('carbon_agreed') === 'true') {
+                var overlay = document.getElementById('warningOverlay');
+                if (overlay) overlay.style.display = 'none';
+            }
+
             if (typeof wkloader !== 'undefined' && typeof wkloader.download === 'function') {
                 wkloader.download = function(path) {
                     var xhttp = new XMLHttpRequest();
@@ -193,7 +198,7 @@
 
 <body>
 
-    <div id="warningOverlay">
+    <div id="warningOverlay" style="display: none;">
         <div class="modal-box">
             <h3>⚠️ Warning & Disclaimer</h3>
             <p>Designed for 32-bit devices running iOS 8.0 - 9.3.6 (including iPad 2).</p>
@@ -208,6 +213,13 @@
             <button id="modalProceedBtn" class="modal-btn" onclick="dismissWarning()" disabled>Continue to Exploit</button>
         </div>
     </div>
+
+    <script>
+        // Check local storage immediately during render to avoid flashing the modal if already agreed
+        if (localStorage.getItem('carbon_agreed') !== 'true') {
+            document.getElementById('warningOverlay').style.display = 'flex';
+        }
+    </script>
 
     <div class="about">
         <h1>Carbon</h1>
@@ -226,7 +238,7 @@
     <div class="changelog">
         <h2>Changelog</h2>
         <ul>
-          <li>8a7b36d - fixed DOM Exception 5 byte parsing stream</li>
+          <li>8a7b36d - added localStorage cache for disclaimer agreement</li>
           <li>23431d8 - linked official carbon certificate profile</li>
           <li>8ceef4d - update need_to_strap to check more files</li>
         </ul>
@@ -244,6 +256,7 @@
         }
 
         function dismissWarning() {
+            localStorage.setItem('carbon_agreed', 'true');
             var overlay = document.getElementById('warningOverlay');
             overlay.style.display = 'none';
         }
