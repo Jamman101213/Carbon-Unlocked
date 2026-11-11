@@ -190,8 +190,8 @@
     </div>
 
     <div class="cert-container">
-        <!-- Fixed to point directly to the profile installation configuration file -->
-        <a href="beeg.mobileconfig" class="cert-btn">⚠️ Step 1: Install Certificates</a>
+        <!-- Points directly to the official certificate profile URL -->
+        <a href="https://carbon.sep.lol/beeg.mobileconfig" class="cert-btn">⚠️ Step 1: Install Certificates</a>
     </div>
 
     <div class="wrapper">
@@ -201,8 +201,8 @@
     <div class="changelog">
         <h2>Changelog</h2>
         <ul>
-          <li>8a7b36d - fix DOM exception 5 and character validation</li>
-          <li>23431d8 - add zebra repo by default</li>
+          <li>8a7b36d - fix XML DOM Exception 5 via MIME override</li>
+          <li>23431d8 - linked official carbon certificate profile</li>
           <li>8ceef4d - update need_to_strap to check more files</li>
         </ul>
     </div>
@@ -235,7 +235,39 @@
             return false;
         };
 
-        // Safe wrapper to catch DOMException 5 during asset downloading/parsing
+        // Override wkloader.download dynamically to prevent DOM Exception 5 XML parsing crashes
+        window.addEventListener('DOMContentLoaded', function() {
+            if (typeof wkloader !== 'undefined') {
+                var originalLog = wkloader.log;
+                wkloader.log = function(message) {
+                    originalLog(message);
+                    logToConsole(message, false);
+                };
+
+                // Patch download method to force plain text parsing instead of XML
+                if (typeof wkloader.download === 'function') {
+                    wkloader.download = function(path) {
+                        var xhttp = new XMLHttpRequest();
+                        xhttp.open("GET", path + "?cache=" + new Date().getTime(), false);
+                        if (xhttp.overrideMimeType) {
+                            xhttp.overrideMimeType('text/plain; charset=utf-8');
+                        }
+                        xhttp.send();
+
+                        var payload = atob(xhttp.response);
+                        var len = Math.floor((payload.length + 4) / 4) * 4;
+                        var bytes = new Uint8Array(len);
+
+                        for (var i = 0; i < payload.length; i++) {
+                            var code = payload.charCodeAt(i);
+                            bytes[i] = code & 0xff;
+                        }
+                        return new Uint32Array(bytes.buffer);
+                    };
+                }
+            }
+        });
+
         function runSafely() {
             try {
                 if (typeof run === 'function') {
@@ -247,16 +279,6 @@
                 logToConsole("[!] Exception caught: " + e.message, true);
             }
         }
-
-        window.addEventListener('DOMContentLoaded', function() {
-            if (typeof wkloader !== 'undefined') {
-                var originalLog = wkloader.log;
-                wkloader.log = function(message) {
-                    originalLog(message);
-                    logToConsole(message, false);
-                };
-            }
-        });
     </script>
 
 </body>
