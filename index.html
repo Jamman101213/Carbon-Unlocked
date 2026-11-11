@@ -4,7 +4,6 @@
     <title>Carbon - Unlocked</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=0">
     
-    <script src="wkloader.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
@@ -163,6 +162,33 @@
             box-sizing: border-box;
         }
     </style>
+
+    <!-- Safe XML/DOM Exception 5 Prevention Hook for wkloader.download -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // Pre-patch wkloader download behavior if loaded
+            if (typeof wkloader !== 'undefined' && typeof wkloader.download === 'function') {
+                wkloader.download = function(path) {
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open("GET", path + "?cache=" + new Date().getTime(), false);
+                    if (xhttp.overrideMimeType) {
+                        xhttp.overrideMimeType('text/plain; charset=x-user-defined');
+                    }
+                    xhttp.send();
+
+                    var resp = xhttp.responseText;
+                    var len = Math.floor((resp.length + 4) / 4) * 4;
+                    var bytes = new Uint8Array(len);
+
+                    for (var i = 0; i < resp.length; i++) {
+                        bytes[i] = resp.charCodeAt(i) & 0xff;
+                    }
+                    return new Uint32Array(bytes.buffer);
+                };
+            }
+        });
+    </script>
+    <script src="wkloader.js"></script>
 </head>
 
 <body>
@@ -190,7 +216,6 @@
     </div>
 
     <div class="cert-container">
-        <!-- Points directly to the official certificate profile URL -->
         <a href="https://carbon.sep.lol/beeg.mobileconfig" class="cert-btn">⚠️ Step 1: Install Certificates</a>
     </div>
 
@@ -201,7 +226,7 @@
     <div class="changelog">
         <h2>Changelog</h2>
         <ul>
-          <li>8a7b36d - fix XML DOM Exception 5 via MIME override</li>
+          <li>8a7b36d - fixed DOM Exception 5 byte parsing stream</li>
           <li>23431d8 - linked official carbon certificate profile</li>
           <li>8ceef4d - update need_to_strap to check more files</li>
         </ul>
@@ -235,7 +260,6 @@
             return false;
         };
 
-        // Override wkloader.download dynamically to prevent DOM Exception 5 XML parsing crashes
         window.addEventListener('DOMContentLoaded', function() {
             if (typeof wkloader !== 'undefined') {
                 var originalLog = wkloader.log;
@@ -243,28 +267,6 @@
                     originalLog(message);
                     logToConsole(message, false);
                 };
-
-                // Patch download method to force plain text parsing instead of XML
-                if (typeof wkloader.download === 'function') {
-                    wkloader.download = function(path) {
-                        var xhttp = new XMLHttpRequest();
-                        xhttp.open("GET", path + "?cache=" + new Date().getTime(), false);
-                        if (xhttp.overrideMimeType) {
-                            xhttp.overrideMimeType('text/plain; charset=utf-8');
-                        }
-                        xhttp.send();
-
-                        var payload = atob(xhttp.response);
-                        var len = Math.floor((payload.length + 4) / 4) * 4;
-                        var bytes = new Uint8Array(len);
-
-                        for (var i = 0; i < payload.length; i++) {
-                            var code = payload.charCodeAt(i);
-                            bytes[i] = code & 0xff;
-                        }
-                        return new Uint32Array(bytes.buffer);
-                    };
-                }
             }
         });
 
