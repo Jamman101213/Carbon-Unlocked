@@ -15,7 +15,7 @@
             padding: 20px;
         }
 
-        /* Fullscreen modal overlay */
+        /* Fullscreen flat warning overlay */
         #warningOverlay {
             position: fixed;
             top: 0;
@@ -32,12 +32,12 @@
         .modal-box {
             background-color: #ffffff;
             color: #333333;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 30px;
             max-width: 450px;
             width: 85%;
             text-align: left;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid #cccccc;
         }
 
         .modal-box h3 {
@@ -66,7 +66,7 @@
             display: block;
             width: 100%;
             font-size: 16px;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
         }
@@ -77,11 +77,44 @@
         }
 
         .about {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+        }
+
+        .about h1 {
+            margin-bottom: 5px;
+            font-size: 32px;
+        }
+
+        .about h2 {
+            font-size: 15px;
+            color: #666;
+            margin: 5px 0;
+            font-weight: normal;
+        }
+
+        /* Certificate Section */
+        .cert-container {
+            margin-bottom: 20px;
+        }
+
+        .cert-btn {
+            background-color: #34C759;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cert-btn:hover {
+            background-color: #28a745;
         }
 
         .wrapper {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .button {
@@ -90,10 +123,8 @@
             color: white;
             padding: 15px 32px;
             text-align: center;
-            text-decoration: none;
-            display: inline-block;
             font-size: 16px;
-            border-radius: 10px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
         }
@@ -102,19 +133,37 @@
             background-color: #005BB5;
         }
 
-        .button:disabled {
-            background-color: #999999;
-            cursor: not-allowed;
-        }
-
         .changelog {
             text-align: left;
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #dcdcdc;
+            font-size: 13px;
+        }
+
+        .changelog h2 {
+            font-size: 15px;
+            margin-top: 0;
+        }
+
+        /* Error / Console Box (Flat Dark Theme) */
+        .console-box {
+            text-align: left;
+            background-color: #111111;
+            color: #00ff66;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 6px;
+            height: 100px;
+            overflow-y: auto;
+            border: 1px solid #333333;
+            max-width: 500px;
+            margin: 20px auto 0 auto;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -124,9 +173,9 @@
     <!-- Fullscreen Warning Overlay -->
     <div id="warningOverlay">
         <div class="modal-box">
-            <h3>⚠️ Disclaimer & Warning</h3>
-            <p><strong>Target Versions:</strong> Designed for 32-bit devices running iOS 8.0 through 9.3.6.</p>
-            <p>This may occasionally fail, just close safari and reopen it and try again. This software is provided as-is with no guarantees. We assume <strong>no responsibility</strong> for device instability.</p>
+            <h3>⚠️ Warning & Disclaimer</h3>
+            <p>Designed for 32-bit devices running iOS 8.0 - 9.3.6 (including iPad 2).</p>
+            <p>Kernel exploits can occasionally cause unexpected reboots or kernel panics. Proceed at your own risk.</p>
             
             <div class="modal-checkbox">
                 <label>
@@ -134,31 +183,38 @@
                 </label>
             </div>
 
-            <button id="modalProceedBtn" class="modal-btn" onclick="dismissWarning()" disabled>Proceed to Exploit</button>
+            <button id="modalProceedBtn" class="modal-btn" onclick="dismissWarning()" disabled>Continue to Exploit</button>
         </div>
     </div>
 
     <!-- Main Page Content -->
-    <a href="beeg.mobileconfig">Install certs</a>
     <div class="about">
         <h1>Carbon</h1>
         <h2>@mineekdev &amp; @staturnzdev</h2>
-        <h2>iOS 8.0-9.3.6, 32 bit (Unlocked Edition)</h2>
+        <h2>iOS 8.0-9.3.6, 32 bit (Unlocked)</h2>
+    </div>
+
+    <!-- Prominent Certificate Button -->
+    <div class="cert-container">
+        <a href="beeg.mobileconfig" class="cert-btn">⚠️ Step 1: Install Certificates</a>
     </div>
 
     <div class="wrapper">
-        <button id="exploitBtn" class="button" onclick="this.innerText='Exploiting'; setTimeout(function() { run(); }, 50)">Run Exploit</button>
+        <button id="exploitBtn" class="button" onclick="this.innerText='Exploiting'; setTimeout(function() { run(); }, 50)">Step 2: Run Exploit</button>
     </div>
 
     <div class="changelog">
         <h2>Changelog</h2>
         <ul>
-          <li>8a7b36d - fix rare issue with uicache (2026-07-21 21:09:54 +0200)</li>
-          <li>23431d8 - add zebra repo by default (2026-05-01 22:13:07 +0800)</li>
-          <li>8ceef4d - update need_to_strap to check more files (2026-05-01 21:28:45 +0800)</li>
-          <li>93a641d - use CertificateManager by staturnz to install certs (2026-03-27 18:33:49 +0800)</li>
-          <li>ca87954 - fix truststore download (2026-03-27 13:01:34 +0800)</li>
+          <li>8a7b36d - fix rare issue with uicache (2026-07-21)</li>
+          <li>23431d8 - add zebra repo by default (2026-05-01)</li>
+          <li>8ceef4d - update need_to_strap to check more files (2026-05-01)</li>
         </ul>
+    </div>
+
+    <!-- Error & Status Output Box -->
+    <div>
+        <div id="consoleLog" class="console-box">[+] Ready. Install certs first, then run exploit.</div>
     </div>
 
     <script>
@@ -172,6 +228,30 @@
             var overlay = document.getElementById('warningOverlay');
             overlay.style.display = 'none';
         }
+
+        function logToConsole(msg, isError) {
+            var box = document.getElementById('consoleLog');
+            var color = isError ? '#ff4d4d' : '#00ff66';
+            box.innerHTML += '<div style="color: ' + color + ';">' + msg + '</div>';
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // Capture global browser errors / script failures
+        window.onerror = function(msg, url, line) {
+            logToConsole("[!] Error: " + msg + " (line " + line + ")", true);
+            return false;
+        };
+
+        // Pipe custom framework logs and catch wkloader logs
+        window.addEventListener('DOMContentLoaded', function() {
+            if (typeof wkloader !== 'undefined') {
+                var originalLog = wkloader.log;
+                wkloader.log = function(message) {
+                    originalLog(message);
+                    logToConsole(message, false);
+                };
+            }
+        });
     </script>
 
 </body>
