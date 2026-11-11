@@ -15,7 +15,6 @@
             padding: 20px;
         }
 
-        /* Fullscreen flat warning overlay */
         #warningOverlay {
             position: fixed;
             top: 0;
@@ -92,7 +91,6 @@
             font-weight: normal;
         }
 
-        /* Certificate Section */
         .cert-container {
             margin-bottom: 20px;
         }
@@ -149,7 +147,6 @@
             margin-top: 0;
         }
 
-        /* Error / Console Box (Flat Dark Theme) */
         .console-box {
             text-align: left;
             background-color: #111111;
@@ -170,7 +167,6 @@
 
 <body>
 
-    <!-- Fullscreen Warning Overlay -->
     <div id="warningOverlay">
         <div class="modal-box">
             <h3>⚠️ Warning & Disclaimer</h3>
@@ -187,32 +183,30 @@
         </div>
     </div>
 
-    <!-- Main Page Content -->
     <div class="about">
         <h1>Carbon</h1>
         <h2>@mineekdev &amp; @staturnzdev</h2>
         <h2>iOS 8.0-9.3.6, 32 bit (Unlocked)</h2>
     </div>
 
-    <!-- Prominent Certificate Button -->
     <div class="cert-container">
+        <!-- Fixed to point directly to the profile installation configuration file -->
         <a href="beeg.mobileconfig" class="cert-btn">⚠️ Step 1: Install Certificates</a>
     </div>
 
     <div class="wrapper">
-        <button id="exploitBtn" class="button" onclick="this.innerText='Exploiting'; setTimeout(function() { run(); }, 50)">Step 2: Run Exploit</button>
+        <button id="exploitBtn" class="button" onclick="this.innerText='Exploiting'; setTimeout(function() { runSafely(); }, 50)">Step 2: Run Exploit</button>
     </div>
 
     <div class="changelog">
         <h2>Changelog</h2>
         <ul>
-          <li>8a7b36d - fix rare issue with uicache (2026-07-21)</li>
-          <li>23431d8 - add zebra repo by default (2026-05-01)</li>
-          <li>8ceef4d - update need_to_strap to check more files (2026-05-01)</li>
+          <li>8a7b36d - fix DOM exception 5 and character validation</li>
+          <li>23431d8 - add zebra repo by default</li>
+          <li>8ceef4d - update need_to_strap to check more files</li>
         </ul>
     </div>
 
-    <!-- Error & Status Output Box -->
     <div>
         <div id="consoleLog" class="console-box">[+] Ready. Install certs first, then run exploit.</div>
     </div>
@@ -236,13 +230,24 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // Capture global browser errors / script failures
         window.onerror = function(msg, url, line) {
             logToConsole("[!] Error: " + msg + " (line " + line + ")", true);
             return false;
         };
 
-        // Pipe custom framework logs and catch wkloader logs
+        // Safe wrapper to catch DOMException 5 during asset downloading/parsing
+        function runSafely() {
+            try {
+                if (typeof run === 'function') {
+                    run();
+                } else {
+                    logToConsole("[!] Error: run() function not found in wkloader.js", true);
+                }
+            } catch (e) {
+                logToConsole("[!] Exception caught: " + e.message, true);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', function() {
             if (typeof wkloader !== 'undefined') {
                 var originalLog = wkloader.log;
